@@ -34,7 +34,7 @@ import {
   getDwvVersion,
   decoderScripts
 } from 'dwv';
-import { InvertColors, RotateLeft } from '@mui/icons-material';
+import { InvertColors, PlayArrow, RotateLeft } from '@mui/icons-material';
 
 // Image decoders (for web workers)
 decoderScripts.jpeg2000 = `${process.env.PUBLIC_URL}/assets/dwv/decoders/pdfjs/decode-jpeg2000.js`;
@@ -146,9 +146,12 @@ class DwvComponent extends React.Component {
 
     return (
       <div id="dwv">
-        {this.state.rotateValue}
         <LinearProgress variant="determinate" value={loadProgress} />
-        <Stack direction="row" spacing={1} padding={1} justifyContent="center" flexWrap="wrap">
+        <Stack direction="row" spacing={1} padding={1} justifyContent="center" flexWrap="wrap" sx={{
+          zIndex: 99999,
+          position: 'relative',
+          background: 'white'
+        }} >
           {/* Tool selection */}
           <ToggleButtonGroup
             size="small"
@@ -179,7 +182,7 @@ class DwvComponent extends React.Component {
           style={{
             filter: `invert(${this.state.isInvert ? 1 : 0})`,
             transform: `rotate(${this.state.rotateValue}deg)`,
-            transformOrigin: 'center'
+            transformOrigin: 'center',
           }}
         >
           <div id="dropBox"></div>
@@ -286,7 +289,7 @@ class DwvComponent extends React.Component {
   getToolIcon = (tool) => {
     let res;
     if (tool === 'Scroll') {
-      res = (<MenuIcon />);
+      res = (<PlayArrow />);
     } else if (tool === 'ZoomAndPan') {
       res = (<SearchIcon />);
     } else if (tool === 'WindowLevel') {
