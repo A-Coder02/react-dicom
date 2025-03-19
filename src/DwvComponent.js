@@ -34,7 +34,7 @@ import {
   getDwvVersion,
   decoderScripts
 } from 'dwv';
-import { InvertColors } from '@mui/icons-material';
+import { InvertColors, RotateLeft } from '@mui/icons-material';
 
 // Image decoders (for web workers)
 decoderScripts.jpeg2000 = `${process.env.PUBLIC_URL}/assets/dwv/decoders/pdfjs/decode-jpeg2000.js`;
@@ -74,9 +74,15 @@ class DwvComponent extends React.Component {
         Draw: {
           options: ['Ruler', 'Arrow', 'Protractor', 'Circle', 'Rectangle']
         },
-        Invert: {}
+        // Custom
+        Invert: {},
+        Rotate: {
+          options: [0, 90, 180, 270],
+          selected: 0
+        }
       },
       isInvert: false,
+      rotateValue: 0,
       selectedTool: 'WindowLevel',
       loadProgress: 0,
       dataLoaded: false,
@@ -118,6 +124,9 @@ class DwvComponent extends React.Component {
           if (tool === 'Invert') {
             this.setState({ isInvert: !this.state.isInvert })
           }
+          if (tool === 'Rotate') {
+            this.setState({ rotateValue: this.state.rotateValue + 90 })
+          }
         }}
       >
         {this.getToolIcon(tool)}
@@ -137,6 +146,7 @@ class DwvComponent extends React.Component {
 
     return (
       <div id="dwv">
+        {this.state.rotateValue}
         <LinearProgress variant="determinate" value={loadProgress} />
         <Stack direction="row" spacing={1} padding={1} justifyContent="center" flexWrap="wrap">
           {/* Tool selection */}
@@ -167,7 +177,9 @@ class DwvComponent extends React.Component {
 
         <div id="layerGroup0" className="layerGroup"
           style={{
-            filter: `invert(${this.state?.isInvert ? 1 : 0})`
+            filter: `invert(${this.state.isInvert ? 1 : 0})`,
+            transform: `rotate(${this.state.rotateValue}deg)`,
+            transformOrigin: 'center'
           }}
         >
           <div id="dropBox"></div>
@@ -284,6 +296,9 @@ class DwvComponent extends React.Component {
     }
     else if (tool === 'Invert') {
       res = (<InvertColors />);
+    }
+    else if (tool === 'Rotate') {
+      res = (<RotateLeft />);
     }
     return res;
   }
