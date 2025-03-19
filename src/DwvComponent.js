@@ -89,6 +89,8 @@ class DwvComponent extends React.Component {
   }
 
   render() {
+    console.log({ d: this.state.dwvApp })
+
     const { classes } = this.props;
     const { versions, tools, loadProgress, dataLoaded, metaData } = this.state;
 
@@ -99,6 +101,7 @@ class DwvComponent extends React.Component {
     };
     const handleShapeChange = (event, newShape) => {
       if (newShape) {
+        console.log({ event, newShape })
         this.onChangeShape(newShape);
       }
     };
@@ -144,7 +147,7 @@ class DwvComponent extends React.Component {
             <ToggleButtonGroup
               size="small"
               color="secondary"
-              value={this.state.selectedTool}
+              value={this.state.selectedShape}
               exclusive
               onChange={handleShapeChange}
             >
@@ -342,6 +345,7 @@ class DwvComponent extends React.Component {
   onChangeShape = (shape) => {
     if (this.state.dwvApp) {
       this.state.dwvApp.setToolFeatures({ shapeName: shape });
+      this.setState({ selectedShape: shape });
     }
   }
 
