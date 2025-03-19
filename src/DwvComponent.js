@@ -34,6 +34,7 @@ import {
   getDwvVersion,
   decoderScripts
 } from 'dwv';
+import { InvertColors } from '@mui/icons-material';
 
 // Image decoders (for web workers)
 decoderScripts.jpeg2000 = `${process.env.PUBLIC_URL}/assets/dwv/decoders/pdfjs/decode-jpeg2000.js`;
@@ -72,9 +73,11 @@ class DwvComponent extends React.Component {
         WindowLevel: {},
         Draw: {
           options: ['Ruler', 'Arrow', 'Protractor', 'Circle', 'Rectangle']
-        }
+        },
+        Invert: {}
       },
-      selectedTool: 'Select Tool',
+      isInvert: false,
+      selectedTool: 'WindowLevel',
       loadProgress: 0,
       dataLoaded: false,
       dwvApp: null,
@@ -111,6 +114,11 @@ class DwvComponent extends React.Component {
         key={tool}
         title={tool}
         disabled={!dataLoaded || !this.canRunTool(tool)}
+        onClick={() => {
+          if (tool === 'Invert') {
+            this.setState({ isInvert: !this.state.isInvert })
+          }
+        }}
       >
         {this.getToolIcon(tool)}
       </ToggleButton>
@@ -157,7 +165,11 @@ class DwvComponent extends React.Component {
         </Stack>
 
 
-        <div id="layerGroup0" className="layerGroup">
+        <div id="layerGroup0" className="layerGroup"
+          style={{
+            filter: `invert(${this.state?.isInvert ? 1 : 0})`
+          }}
+        >
           <div id="dropBox"></div>
         </div>
 
@@ -199,7 +211,7 @@ class DwvComponent extends React.Component {
         // available tools
         let selectedTool = 'ZoomAndPan';
         if (app.canScroll()) {
-          selectedTool = 'Scroll';
+          selectedTool = 'WindowLevel';
         }
         this.onChangeTool(selectedTool);
       }
@@ -269,6 +281,9 @@ class DwvComponent extends React.Component {
       res = (<ContrastIcon />);
     } else if (tool === 'Draw') {
       res = (<StraightenIcon />);
+    }
+    else if (tool === 'Invert') {
+      res = (<InvertColors />);
     }
     return res;
   }
