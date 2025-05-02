@@ -320,18 +320,6 @@ class DwvComponent extends React.Component {
                     Take Screenshot
                   </Button>
                 )}
-                {dataLoaded && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={!dataLoaded}
-                    onClick={() => {
-                      this.handlePrint();
-                    }}
-                  >
-                    Print File
-                  </Button>
-                )}
               </Box>
 
               {/* Draw Options */}
