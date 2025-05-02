@@ -140,6 +140,66 @@ class DwvComponent extends React.Component {
     }
   };
 
+  handlePrint = () => {
+    const printWindow = window.open("", "_blank");
+    const element = document.getElementById("layerGroup0");
+
+    if (!element) {
+      this.setState({ error: "DICOM viewer element not found" });
+      return;
+    }
+
+    // Clone the element to avoid modifying the original
+    const clone = element.cloneNode(true);
+
+    // Create print-friendly HTML
+    printWindow.document.open();
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>DICOM Print</title>
+          <style>
+            body { margin: 0; padding: 20px; text-align: center; }
+            img { max-width: 100%; height: auto; }
+            .print-meta { 
+              margin-bottom: 20px; 
+              text-align: left;
+              font-family: Arial, sans-serif;
+            }
+            @page { size: auto; margin: 0mm; }
+          </style>
+        </head>
+        <body>
+          <div class="print-meta">
+            <h2>DICOM Study Print</h2>
+            <p>Printed on: ${new Date().toLocaleString()}</p>
+            ${
+              this.state.metaData.PatientName
+                ? `<p>Patient: ${this.state.metaData.PatientName}</p>`
+                : ""
+            }
+          </div>
+          <div id="print-content"></div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+                window.close();
+              }, 200);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    // Append the cloned content
+    const printContent = printWindow.document.getElementById("print-content");
+    printContent.appendChild(clone);
+
+    printWindow.document.close();
+  };
+
   render() {
     console.log({ d: this.state.dwvApp });
 
@@ -191,16 +251,17 @@ class DwvComponent extends React.Component {
       <div
         id="dwv"
         style={{
-          height: "100%",
+          height: "100vh",
+          overflow: "hidden",
         }}
       >
         <LinearProgress variant="determinate" value={loadProgress} />
-        <Stack
+        <Box
           direction="row"
           spacing={1}
           padding={1}
-          justifyContent="center"
-          alignItems={"center"}
+          // justifyContent="center"
+          // alignItems={"center"}
           flexWrap="wrap"
           sx={{
             zIndex: 99999,
@@ -208,59 +269,89 @@ class DwvComponent extends React.Component {
             backgroundColor: grey[900],
           }}
         >
-          {/* Tool selection */}
-          <Stack
-            gap={2}
-            alignItems={"center"}
-            justifyContent={"center"}
-            sx={{
-              height: "fit-content",
-            }}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
           >
-            <Box display="flex" gap={2} alignItems="center">
-              <ToggleButtonGroup
-                size="small"
-                color="primary"
-                variant="contained"
-                value={this.state.selectedTool}
-                exclusive
-                onChange={handleToolChange}
-                sx={{
-                  backgroundColor: "white",
-                  width: "fit-content",
-                }}
-              >
-                {toolsButtons}
-              </ToggleButtonGroup>
-              {dataLoaded && (
-                <Button
-                  variant="contained"
+            {/* Tool selection */}
+            <Typography
+              sx={{
+                fontSize: "1.8rem",
+                fontWeight: "500",
+                color: "white",
+              }}
+            >
+              Dicolite
+            </Typography>
+            <Stack
+              gap={2}
+              alignItems={"center"}
+              justifyContent={"center"}
+              sx={{
+                height: "fit-content",
+                width: "100%",
+              }}
+            >
+              <Box display="flex" gap={2} alignItems="center">
+                <ToggleButtonGroup
+                  size="small"
                   color="primary"
-                  disabled={!dataLoaded}
-                  onClick={() => {
-                    this.handleDownloadImage();
+                  variant="contained"
+                  value={this.state.selectedTool}
+                  exclusive
+                  onChange={handleToolChange}
+                  sx={{
+                    backgroundColor: "white",
+                    width: "fit-content",
                   }}
                 >
-                  Take Screenshot
-                </Button>
-              )}
-            </Box>
+                  {toolsButtons}
+                </ToggleButtonGroup>
+                {dataLoaded && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!dataLoaded}
+                    onClick={() => {
+                      this.handleDownloadImage();
+                    }}
+                  >
+                    Take Screenshot
+                  </Button>
+                )}
+                {dataLoaded && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!dataLoaded}
+                    onClick={() => {
+                      this.handlePrint();
+                    }}
+                  >
+                    Print File
+                  </Button>
+                )}
+              </Box>
 
-            {/* Draw Options */}
-            {this.state.selectedTool === "Draw" ? (
-              <ToggleButtonGroup
-                size="small"
-                color="secondary"
-                value={this.state.selectedShape}
-                exclusive
-                onChange={handleShapeChange}
-              >
-                {drawOptions}
-              </ToggleButtonGroup>
-            ) : null}
-          </Stack>
-          <div></div>
-        </Stack>
+              {/* Draw Options */}
+              {this.state.selectedTool === "Draw" ? (
+                <ToggleButtonGroup
+                  size="small"
+                  color="secondary"
+                  value={this.state.selectedShape}
+                  exclusive
+                  onChange={handleShapeChange}
+                  sx={{
+                    backgroundColor: "white",
+                  }}
+                >
+                  {drawOptions}
+                </ToggleButtonGroup>
+              ) : null}
+            </Stack>
+          </Box>
+        </Box>
 
         <div
           id="layerGroup0"
